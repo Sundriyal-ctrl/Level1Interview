@@ -4,6 +4,7 @@ import ExceptionClasses.DuplicateEmployeeDetailsException;
 import ExceptionClasses.InvalidEmployeeIdException;
 
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 
 public class EmployeeBean {
 
@@ -24,32 +25,41 @@ public class EmployeeBean {
     }
 
     private String department;
+    public int getIdd(int id) {
+        return id;
+    }
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(int id,HashSet<EmployeeBean> hashSet)throws DuplicateEmployeeDetailsException,InvalidEmployeeIdException {
         try {
             if (id >= 1000 && id <= 2000)
             {
                 try {
-                    if (hashSet.contains(id))
-                        throw new DuplicateEmployeeDetailsException();
-                    else {
+                    EmployeeBean obj=null;
+                    try {
+                          obj= hashSet.stream()
+                                  .filter(ele -> ele.getId()==id)
+                                  .findFirst().get();
+                        if (obj.getId()==id)
+                            throw new DuplicateEmployeeDetailsException();
+                      }catch(NoSuchElementException  noSuchElementException){
                         this.id = id;
-                        hashSet.add(id);
+
                     }
-                }catch(DuplicateEmployeeDetailsException duplicateEmployeeDetailsException)
+                }catch(DuplicateEmployeeDetailsException  duplicateEmployeeDetailsException)
                 {
-                    System.err.println(duplicateEmployeeDetailsException.getMessage());
+                   throw new DuplicateEmployeeDetailsException();
                 }
+
 
             }
             else
                 throw new InvalidEmployeeIdException();
         }catch(InvalidEmployeeIdException invalidError)
         {
-            System.out.println(invalidError.getMessage());
+            throw new InvalidEmployeeIdException();
         }
     }
 

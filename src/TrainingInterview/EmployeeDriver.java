@@ -1,11 +1,13 @@
 package TrainingInterview;
-
+import ExceptionClasses.DuplicateEmployeeDetailsException;
+import ExceptionClasses.InvalidEmployeeIdException;
 import ExceptionClasses.InvalidExperienceException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 public class EmployeeDriver {
@@ -15,15 +17,22 @@ public class EmployeeDriver {
     //Add Employess Details
     void addEmployeeDetail(int id,String name,String degisnation, String address, int experience,String Department)
     {
+
        employeeBean = new EmployeeBean();
-       employeeBean.setId(id);
-       employeeBean.setName(name);
-       employeeBean.setAddress(address);
-       employeeBean.setDesignation(degisnation);
-       employeeBean.setExperience(experience);
-       employeeBean.setDepartment(Department);
-       hashSet.add(employeeBean);
-        System.out.println("Employee "+name+" is successfully added ");
+       try {
+           employeeBean.setId(id, hashSet);
+           employeeBean.setName(name);
+           employeeBean.setAddress(address);
+           employeeBean.setDesignation(degisnation);
+           employeeBean.setExperience(experience);
+           employeeBean.setDepartment(Department);
+           hashSet.add(employeeBean);
+           System.out.println("Employee "+name+" is successfully added ");
+       }catch(DuplicateEmployeeDetailsException | InvalidEmployeeIdException duplicateEmployeeDetailsException)
+       {
+           System.err.println(duplicateEmployeeDetailsException.getMessage());
+       }
+
     }
 
     //Show All Employee Id and Name
@@ -111,22 +120,24 @@ public class EmployeeDriver {
         int id = Integer.parseInt(bufferedReader.readLine());
         if(!employeeBean.getHashSet().contains(id))
         {
-            EmployeeBean obj = hashSet.stream()
-                    .filter(ele -> ele.equals(id))
-                    .findFirst()
-                    .orElse(null);
+
 
              for(EmployeeBean employeeBean1 : hashSet)
              {
                  try {
-                     if (employeeBean.getHashSet().contains(id) && obj.getExperience() > 5) {
+                     EmployeeBean obj = hashSet.stream()
+                             .filter(ele -> ele.getId()==id)
+                             .findFirst().get();
+                     if (obj.getExperience() > 5 ) {
                          obj.setDesignation("Manager");
+                         hashSet.add(obj);
+                         break;
                      } else {
                          throw new InvalidExperienceException();
                      }
-                 }catch(InvalidExperienceException invalidExperienceException)
+                 }catch(InvalidExperienceException | NoSuchElementException invalidExperienceException)
                  {
-                     System.out.println(invalidExperienceException.getMessage());
+                     System.err.println(invalidExperienceException.getMessage());
                  }
              }
         }
